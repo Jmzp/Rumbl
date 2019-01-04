@@ -101,4 +101,9 @@ defmodule Rumbl.Videos do
   def change_video(%Video{} = video) do
     Video.changeset(video, %{})
   end
+
+  def user_videos(user)  do
+    assoc(user, :videos)
+  end
+
 end

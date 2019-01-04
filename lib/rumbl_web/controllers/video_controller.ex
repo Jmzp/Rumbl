@@ -4,23 +4,35 @@ defmodule RumblWeb.VideoController do
   alias Rumbl.Videos
   alias Rumbl.Videos.Video
 
+  def action(conn, _) do  # modify the default action function of the controller to pass the current_user
+    apply(__MODULE__, action_name(conn),
+      [conn, conn.params, conn.assigns.current_user])
+  end
+
   def index(conn, _params) do
     videos = Videos.list_videos()
     render(conn, "index.html", videos: videos)
   end
 
-  def new(conn, _params) do
-    changeset = Videos.change_video(%Video{})
+  def new(conn, _params, user) do
+    changeset =
+    user
+    |> build_assoc(:videos) # build the assoc of the users with videos
+    |> Video.changeset()
     render(conn, "new.html", changeset: changeset)
   end
 
-  def create(conn, %{"video" => video_params}) do
-    case Videos.create_video(video_params) do
-      {:ok, video} ->
+  def create(conn, %{"video" => video_params}, user) do
+    changeset =
+      user
+      |> build_assoc(:videos)
+      |> Video.changeset(video_params)
+    case Repo.insert(changeset) do
+      {:ok, _video} ->
         conn
         |> put_flash(:info, "Video created successfully.")
-        |> redirect(to: video_path(conn, :show, video))
-      {:error, %Ecto.Changeset{} = changeset} ->
+        |> redirect(to: video_path(conn, :index))
+      {:error, changeset} ->
         render(conn, "new.html", changeset: changeset)
     end
   end
@@ -57,4 +69,5 @@ defmodule RumblWeb.VideoController do
     |> put_flash(:info, "Video deleted successfully.")
     |> redirect(to: video_path(conn, :index))
   end
+
 end
