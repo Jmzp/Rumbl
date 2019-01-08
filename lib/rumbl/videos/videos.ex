@@ -7,6 +7,7 @@ defmodule Rumbl.Videos do
   alias Rumbl.Repo
 
   alias Rumbl.Videos.Video
+  alias Rumbl.Users.User
 
   @doc """
   Returns the list of videos.
@@ -102,8 +103,20 @@ defmodule Rumbl.Videos do
     Video.changeset(video, %{})
   end
 
-  def user_videos(user)  do
-    assoc(user, :videos)
+  def create_video_assoc_with_user(user, params) do
+    changeset =
+      user
+      |> Ecto.build_assoc(:videos) # Builds a struct from the given assoc in struct.
+      |> Video.changeset(params)
+      |> Repo.insert()
+  end
+
+  def all_user_videos(user) do
+    Repo.all(User.user_videos(user))
+  end
+
+  def get_user_video(user, id) do
+    Repo.get!(User.user_videos(user), id)
   end
 
 end

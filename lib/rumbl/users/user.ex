@@ -36,4 +36,8 @@ defmodule Rumbl.Users.User do
     end
   end
 
+  def user_videos(user)  do
+    Ecto.assoc(user, :videos)
+  end
+
 end
