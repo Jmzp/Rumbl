@@ -3,6 +3,9 @@ defmodule RumblWeb.VideoController do
 
   alias Rumbl.Videos
   alias Rumbl.Videos.Video
+  alias Rumbl.Videos.Categories
+
+  plug :load_categories when action in [:new, :create, :edit, :update]
 
   def action(conn, _) do  # modify the default action function of the controller to pass the current_user
     apply(__MODULE__, action_name(conn),
@@ -64,6 +67,11 @@ defmodule RumblWeb.VideoController do
     conn
     |> put_flash(:info, "Video deleted successfully.")
     |> redirect(to: video_path(conn, :index))
+  end
+
+  defp load_categories(conn, _) do
+    categories = Categories.load_categories
+    assign(conn, :categories, categories)
   end
 
 end
